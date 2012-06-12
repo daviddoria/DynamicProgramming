@@ -3,6 +3,7 @@
 // STL
 #include <cmath>
 #include <stdexcept>
+#include <algorithm> // for reverse()
 
 // Submodules
 #include "Helpers/Helpers.h"
@@ -19,7 +20,14 @@ void DynamicProgramming::SetNumberOfNodes(const unsigned int numberOfNodes)
 
 float DynamicProgramming::BinaryEnergy(const float a, const float b)
 {
-  return fabs(a-b);
+  if(a != b)
+  {
+    return fabs(a-b);
+  }
+  else
+  {
+    return 10.0f;
+  }
 }
 
 float DynamicProgramming::UnaryEnergy(const float a, const unsigned int position)
@@ -47,6 +55,8 @@ float DynamicProgramming::UnaryEnergy(const float a, const unsigned int position
 
 std::vector<unsigned int> DynamicProgramming::Optimize()
 {
+  std::cout << "Nodes: " << this->NumberOfNodes << " labels: " << this->LabelSet.size() << std::endl;
+
   ComputeGrids();
   std::vector<Index> path = TracePath();
 
@@ -56,6 +66,7 @@ std::vector<unsigned int> DynamicProgramming::Optimize()
     labelIds[i] = path[i][1]; // Extract the label from the index (of (nodes,labels) grid)
   }
 
+  std::reverse (labelIds.begin( ), labelIds.end( ) );
   return labelIds;
 }
 
@@ -83,7 +94,7 @@ void DynamicProgramming::ComputeGrids()
                                    this->CostGrid(node - 1, previousLabel);
       }
       unsigned int bestPredecessor = Helpers::argmin(costs);
-      this->CostGrid(node, label) = UnaryEnergy(this->LabelSet[label], 0) + costs[bestPredecessor];
+      this->CostGrid(node, label) = UnaryEnergy(this->LabelSet[label], node) + costs[bestPredecessor];
       this->PredecessorGrid(node, label) = Index(node-1, bestPredecessor);
     }
   }
@@ -103,12 +114,12 @@ std::vector<DynamicProgramming::Index> DynamicProgramming::TracePath()
   //std::vector<Index> path(this->NumberOfNodes);
   std::vector<Index> path;
 
-  Index currentIndex = this->PredecessorGrid(this->NumberOfNodes - 1, startingLabel);
+  Index currentIndex(this->NumberOfNodes - 1, startingLabel);
 
   while(currentIndex[0] != -1)
   {
     path.push_back(currentIndex);
-    Index currentIndex = this->PredecessorGrid(currentIndex[0], currentIndex[1]);
+    currentIndex = this->PredecessorGrid(currentIndex[0], currentIndex[1]);
   }
 
   return path;

@@ -10,3 +10,5 @@ add_subdirectory(Helpers)
 
 ADD_EXECUTABLE(DynamicProgramming Example.cpp DynamicProgramming.cpp)
 target_link_libraries(DynamicProgramming Helpers)
+
+add_subdirectory(Tests)
