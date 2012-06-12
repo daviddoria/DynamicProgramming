@@ -69,8 +69,6 @@ private:
 
   std::vector<Index> TracePath();
 
-  std::vector<Index> GetPossiblePredecessors(const Index& index);
-
   Eigen::MatrixXf CostGrid;
   IndexMatrixType PredecessorGrid;
 };

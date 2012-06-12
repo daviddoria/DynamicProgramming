@@ -59,28 +59,6 @@ std::vector<unsigned int> DynamicProgramming::Optimize()
   return labelIds;
 }
 
-std::vector<DynamicProgramming::Index> DynamicProgramming::GetPossiblePredecessors(const Index& queryIndex)
-{
-  std::vector<Index> indexes;
-
-  // Check if the three positions in the grid (up-left, up, and up-right) are inside the grid, and if they are, include them in
-  // the possible predecessor set.
-  for(int colOffset = -1; colOffset <= 1; ++colOffset)
-  {
-    Index potentialPossiblePredecessor;
-    potentialPossiblePredecessor[0] = queryIndex[0] - 1;
-    potentialPossiblePredecessor[1] = queryIndex[1] + colOffset;
-
-    if(potentialPossiblePredecessor[0] < 0 || potentialPossiblePredecessor[0] >= this->NumberOfNodes ||
-       potentialPossiblePredecessor[1] < 0 || potentialPossiblePredecessor[1] >= this->LabelSet.size())
-    {
-      continue;
-    }
-    indexes.push_back(potentialPossiblePredecessor);
-  }
-  return indexes;
-}
-
 void DynamicProgramming::ComputeGrids()
 {
   this->CostGrid = Eigen::MatrixXf (this->NumberOfNodes, this->LabelSet.size());
@@ -97,24 +75,21 @@ void DynamicProgramming::ComputeGrids()
   {
     for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
     {
-      Index queryIndex;
-      queryIndex[0] = node;
-      queryIndex[1] = label;
-      std::vector<Index> possiblePredecessors = GetPossiblePredecessors(queryIndex);
-      std::vector<float> costs(possiblePredecessors.size());
+      std::vector<float> costs(this->LabelSet.size());
 
-      for(unsigned int i = 0; i < possiblePredecessors.size(); ++i)
+      for(unsigned int previousLabel = 0; previousLabel < costs.size(); ++previousLabel)
       {
-        costs[i] = UnaryEnergy(this->LabelSet[label], 0) + ;
+        costs[previousLabel] =  BinaryEnergy(this->LabelSet[previousLabel], this->LabelSet[label]) +
+                                   this->CostGrid(node - 1, previousLabel);
       }
       unsigned int bestPredecessor = Helpers::argmin(costs);
-      this->CostGrid(node, label) = costs[bestPredecessor];
-      this->PredecessorGrid(node, label) = possiblePredecessors[bestPredecessor];
+      this->CostGrid(node, label) = UnaryEnergy(this->LabelSet[label], 0) + costs[bestPredecessor];
+      this->PredecessorGrid(node, label) = Index(node-1, bestPredecessor);
     }
   }
 }
 
-std::vector<Index> DynamicProgramming::TracePath()
+std::vector<DynamicProgramming::Index> DynamicProgramming::TracePath()
 {
   // Find min location in last row
   std::vector<float> costs(this->LabelSet.size());
