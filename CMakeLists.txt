@@ -6,9 +6,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x")
 
 include_directories(/media/portable/src/Eigen)
 
-add_subdirectory(Helpers)
+if(NOT TARGET Helpers)
+  add_subdirectory(Helpers)
+endif()
 
 ADD_EXECUTABLE(DynamicProgramming Example.cpp DynamicProgramming.cpp)
 target_link_libraries(DynamicProgramming Helpers)
-
-add_subdirectory(Tests)
