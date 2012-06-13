@@ -28,6 +28,15 @@ std::vector<unsigned int> DynamicProgramming<TLabel, TNode>::Optimize()
 {
   std::cout << "Nodes: " << this->Nodes.size() << " labels: " << this->LabelSet.size() << std::endl;
 
+  if(this->Nodes.size() == 0)
+  {
+    throw std::runtime_error("There are 0 nodes!");
+  }
+  if(this->LabelSet.size())
+  {
+    throw std::runtime_error("There are 0 labels!");
+  }
+
   ComputeGrids();
   std::vector<Index> path = TracePath();
 
@@ -56,6 +65,7 @@ void DynamicProgramming<TLabel, TNode>::ComputeGrids()
 
   for(unsigned int node = 1; node < this->Nodes.size(); ++node) // Start at 1 since 0 was done as the base case
   {
+    std::cout << "Computing grid row " << node << " (out of " << this->Nodes.size() << ")" << std::endl;
     for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
     {
       std::vector<float> costs(this->LabelSet.size());
