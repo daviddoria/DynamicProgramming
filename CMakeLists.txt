@@ -10,5 +10,5 @@ if(NOT TARGET Helpers)
   add_subdirectory(Helpers)
 endif()
 
-ADD_EXECUTABLE(DynamicProgramming Example.cpp DynamicProgramming.cpp)
+ADD_EXECUTABLE(DynamicProgramming Example.cpp)
 target_link_libraries(DynamicProgramming Helpers)

@@ -5,65 +5,32 @@
 #include <vector>
 #include <stdexcept>
 
+#include "Index.h"
+
 // Eigen
 #include <Eigen/Dense>
 
+template <typename TLabel>
 class DynamicProgramming
 {
 
 public:
-  struct Index
-  {
-    int row;
-    int col;
-    Index() : row(-1), col(-1) {}
-    Index(const int r, const int c) : row(r), col(c) {}
-
-    int operator[](const int index) const
-    {
-      if(index == 0)
-      {
-        return row;
-      }
-      else if(index == 1)
-      {
-        return col;
-      }
-      else
-      {
-        throw std::runtime_error("Requested invalid index!");
-      }
-    }
-
-    int& operator[](const int index)
-    {
-      if(index == 0)
-      {
-        return row;
-      }
-      else if(index == 1)
-      {
-        return col;
-      }
-      else
-      {
-        throw std::runtime_error("Requested invalid index!");
-      }
-    }
-  };
 
   typedef Eigen::Matrix<Index, Eigen::Dynamic, Eigen::Dynamic> IndexMatrixType;
 
-  void SetLabelSet(const std::vector<float>& labels);
+  void SetLabelSet(const std::vector<TLabel>& labels);
   void SetNumberOfNodes(const unsigned int numberOfNodes);
   std::vector<unsigned int> Optimize();
 
-private:
-  std::vector<float> LabelSet;
+protected:
+  virtual float UnaryEnergy(const TLabel& label, const unsigned int node) = 0;
+  virtual float BinaryEnergy(const TLabel& labelA, const unsigned int nodeA,
+                             const TLabel& labelB, const unsigned int nodeB) = 0;
+
+  std::vector<TLabel> LabelSet;
   unsigned int NumberOfNodes;
 
-  float UnaryEnergy(const float a, const unsigned int position);
-  float BinaryEnergy(const float a, const float b);
+
 
   void ComputeGrids();
 
@@ -72,5 +39,7 @@ private:
   Eigen::MatrixXf CostGrid;
   IndexMatrixType PredecessorGrid;
 };
+
+#include "DynamicProgramming.hpp"
 
 #endif
