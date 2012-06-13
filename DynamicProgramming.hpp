@@ -50,8 +50,8 @@ void DynamicProgramming<TLabel, TNode>::ComputeGrids()
   // Base case: M_1(x_1) = E_u(x_1) // The cost of assigning node 1 a label named "x_1" (NOT the particular label with id=1)
   for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
     {
-    this->CostGrid(0, label) = UnaryEnergy(this->LabelSet[label], 0);
-    this->PredecessorGrid(0,label) = Index(-1,-1);
+    this->CostGrid(0, label) = UnaryEnergy(this->LabelSet[label], this->Nodes[0]);
+    this->PredecessorGrid(0,label) = Index(-1,-1); // indicates an invalid predecessor
     }
 
   for(unsigned int node = 1; node < this->Nodes.size(); ++node) // Start at 1 since 0 was done as the base case
@@ -62,12 +62,12 @@ void DynamicProgramming<TLabel, TNode>::ComputeGrids()
 
       for(unsigned int previousLabel = 0; previousLabel < costs.size(); ++previousLabel)
       {
-        float binaryEnergy = BinaryEnergy(this->LabelSet[previousLabel], previousLabel,
-                                          this->LabelSet[label], label);
+        float binaryEnergy = BinaryEnergy(this->LabelSet[previousLabel], this->Nodes[node - 1],
+                                          this->LabelSet[label], this->Nodes[node]);
         costs[previousLabel] =  binaryEnergy + this->CostGrid(node - 1, previousLabel);
       }
       unsigned int bestPredecessor = Helpers::argmin(costs);
-      this->CostGrid(node, label) = UnaryEnergy(this->LabelSet[label], node) + costs[bestPredecessor];
+      this->CostGrid(node, label) = UnaryEnergy(this->LabelSet[label], this->Nodes[node]) + costs[bestPredecessor];
       this->PredecessorGrid(node, label) = Index(node-1, bestPredecessor);
     }
   }
