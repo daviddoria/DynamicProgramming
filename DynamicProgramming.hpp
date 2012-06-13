@@ -11,22 +11,22 @@
 // Submodules
 #include "Helpers/Helpers.h"
 
-template <typename TLabel>
-void DynamicProgramming<TLabel>::SetLabelSet(const std::vector<TLabel>& labelSet)
+template <typename TLabel, typename TNode>
+void DynamicProgramming<TLabel, TNode>::SetLabelSet(const std::vector<TLabel>& labelSet)
 {
   this->LabelSet = labelSet;
 }
 
-template <typename TLabel>
-void DynamicProgramming<TLabel>::SetNumberOfNodes(const unsigned int numberOfNodes)
+template <typename TLabel, typename TNode>
+void DynamicProgramming<TLabel, TNode>::SetNodes(const std::vector<TNode>& nodes)
 {
-  this->NumberOfNodes = numberOfNodes;
+  this->Nodes = nodes;
 }
 
-template <typename TLabel>
-std::vector<unsigned int> DynamicProgramming<TLabel>::Optimize()
+template <typename TLabel, typename TNode>
+std::vector<unsigned int> DynamicProgramming<TLabel, TNode>::Optimize()
 {
-  std::cout << "Nodes: " << this->NumberOfNodes << " labels: " << this->LabelSet.size() << std::endl;
+  std::cout << "Nodes: " << this->Nodes.size() << " labels: " << this->LabelSet.size() << std::endl;
 
   ComputeGrids();
   std::vector<Index> path = TracePath();
@@ -41,11 +41,11 @@ std::vector<unsigned int> DynamicProgramming<TLabel>::Optimize()
   return labelIds;
 }
 
-template <typename TLabel>
-void DynamicProgramming<TLabel>::ComputeGrids()
+template <typename TLabel, typename TNode>
+void DynamicProgramming<TLabel, TNode>::ComputeGrids()
 {
-  this->CostGrid = Eigen::MatrixXf (this->NumberOfNodes, this->LabelSet.size());
-  this->PredecessorGrid = IndexMatrixType(this->NumberOfNodes, this->LabelSet.size());
+  this->CostGrid = Eigen::MatrixXf (this->Nodes.size(), this->LabelSet.size());
+  this->PredecessorGrid = IndexMatrixType(this->Nodes.size(), this->LabelSet.size());
 
   // Base case: M_1(x_1) = E_u(x_1) // The cost of assigning node 1 a label named "x_1" (NOT the particular label with id=1)
   for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
@@ -54,7 +54,7 @@ void DynamicProgramming<TLabel>::ComputeGrids()
     this->PredecessorGrid(0,label) = Index(-1,-1);
     }
 
-  for(unsigned int node = 1; node < this->NumberOfNodes; ++node) // Start at 1 since 0 was done as the base case
+  for(unsigned int node = 1; node < this->Nodes.size(); ++node) // Start at 1 since 0 was done as the base case
   {
     for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
     {
@@ -73,22 +73,22 @@ void DynamicProgramming<TLabel>::ComputeGrids()
   }
 }
 
-template <typename TLabel>
-std::vector<Index> DynamicProgramming<TLabel>::TracePath()
+template <typename TLabel, typename TNode>
+std::vector<Index> DynamicProgramming<TLabel, TNode>::TracePath()
 {
   // Find min location in last row
   std::vector<float> costs(this->LabelSet.size());
   for(unsigned int label = 0; label < this->LabelSet.size(); ++label)
   {
-    costs[label] = this->CostGrid(this->NumberOfNodes - 1, label);
+    costs[label] = this->CostGrid(this->Nodes.size() - 1, label);
   }
 
   unsigned int startingLabel = Helpers::argmin(costs);
 
-  //std::vector<Index> path(this->NumberOfNodes);
+  //std::vector<Index> path(this->Nodes.size());
   std::vector<Index> path;
 
-  Index currentIndex(this->NumberOfNodes - 1, startingLabel);
+  Index currentIndex(this->Nodes.size() - 1, startingLabel);
 
   while(currentIndex[0] != -1)
   {
