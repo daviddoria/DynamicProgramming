@@ -30,11 +30,11 @@ std::vector<unsigned int> DynamicProgramming<TLabel, TNode>::Optimize()
 
   if(this->Nodes.size() == 0)
   {
-    throw std::runtime_error("There are 0 nodes!");
+    throw std::runtime_error("DynamicProgramming: There are 0 nodes!");
   }
-  if(this->LabelSet.size())
+  if(this->LabelSet.size() == 0)
   {
-    throw std::runtime_error("There are 0 labels!");
+    throw std::runtime_error("DynamicProgramming: There are 0 labels!");
   }
 
   ComputeGrids();
